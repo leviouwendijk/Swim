@@ -9,10 +9,22 @@ let package = Package(
             name: "Swim",
             targets: ["Swim"]
         ),
+        .executable(
+            name: "swimtest",
+            targets: [
+                "SwimSmoke"
+            ]
+        ),
     ],
     targets: [
         .target(
             name: "Swim"
+        ),
+        .executableTarget(
+            name: "SwimSmoke",
+            dependencies: [
+                "Swim"
+            ]
         ),
     ],
     swiftLanguageModes: [.v6]
