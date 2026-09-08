@@ -5,5 +5,6 @@ enum SwimTest {
     static func main() throws {
         try SwimCommandInterpreterSmoke.run()
         try SwimModalInteractionSmoke.run()
+        try SwimExCommandLineSmoke.run()
     }
 }

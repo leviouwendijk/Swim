@@ -9,6 +9,7 @@ public enum InteractionAction:
     case enterInsert(InsertionPlacement)
     case enterBlockInsert(BlockInsertOperation)
     case enterVisual(SelectionKind)
+    case enterCommandLine
     case returnToNormal
     case activate
     case delete
@@ -247,6 +248,11 @@ public struct ModalInteraction:
                 .motion(
                     .documentEnd
                 )
+            )
+
+        case .char(":"):
+            return .action(
+                .enterCommandLine
             )
 
         case .char("i"):
