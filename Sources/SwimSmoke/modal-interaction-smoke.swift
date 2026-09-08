@@ -71,6 +71,23 @@ enum SwimModalInteractionSmoke {
         }
 
         guard interaction.handle(
+            .char("u")
+        ) == .action(
+            .undo
+        ),
+        interaction.handle(
+            .control("R")
+        ) == .action(
+            .redo
+        ) else {
+            throw SwimTestFailure(
+                probe: "normal undo redo routing",
+                expectation: "u -> undo and Ctrl-R -> redo",
+                observed: "unexpected interaction"
+            )
+        }
+
+        guard interaction.handle(
             .char("g")
         ) == .consumed,
         interaction.handle(

@@ -15,6 +15,8 @@ public enum InteractionAction:
     case delete
     case copy
     case change
+    case undo
+    case redo
 }
 
 public enum InteractionResult:
@@ -307,6 +309,16 @@ public struct ModalInteraction:
         case .char("y"):
             return .action(
                 .copy
+            )
+
+        case .char("u"):
+            return .action(
+                .undo
+            )
+
+        case .control("R"):
+            return .action(
+                .redo
             )
 
         case .enter:
