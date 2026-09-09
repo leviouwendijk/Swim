@@ -49,4 +49,5 @@ public enum SwimEditorEvent:
     case copyRequested(SwimEditorCopy)
     case commandLineRequested
     case cancelRequested
+    case rejected(SwimEditorRejection)
 }

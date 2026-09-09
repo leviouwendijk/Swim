@@ -223,11 +223,13 @@ public struct SwimEditor:
             return nil
 
         case .action(let action):
-            guard allowsBufferAction(
-                action
-            ) else {
+            if let rejection = rejection(
+                for: action
+            ) {
                 normalizeAfterRejectedBufferModification()
-                return .changed
+                return .rejected(
+                    rejection
+                )
             }
 
             let event = apply(
@@ -259,8 +261,10 @@ public struct SwimEditor:
         _ text: String,
         context: SwimEditorContext = .init()
     ) -> SwimEditorEvent? {
-        guard bufferModifiability == .modifiable else {
-            return nil
+        if let rejection = bufferModificationRejection {
+            return .rejected(
+                rejection
+            )
         }
 
         let before = buffer

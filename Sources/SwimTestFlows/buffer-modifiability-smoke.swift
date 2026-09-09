@@ -67,29 +67,35 @@ enum SwimBufferModifiabilitySmoke {
             bufferModifiability: .nonmodifiable
         )
 
+        let rejection = SwimEditorEvent.rejected(
+            SwimEditorRejection(
+                reason: .bufferNonmodifiable
+            )
+        )
+
         guard editor.handle(
             .char("i")
-        ) == .changed,
+        ) == rejection,
         editor.mode == .normal,
         editor.buffer.text == "alpha beta",
         editor.handle(
             .char("x")
-        ) == .changed,
+        ) == rejection,
         editor.buffer.text == "alpha beta",
         editor.handle(
             .char("d")
         ) == nil,
         editor.handle(
             .char("w")
-        ) == .changed,
+        ) == rejection,
         editor.buffer.text == "alpha beta",
         editor.handle(
             .char("p")
-        ) == .changed,
+        ) == rejection,
         editor.buffer.text == "alpha beta",
         editor.paste(
             "!"
-        ) == nil,
+        ) == rejection,
         editor.buffer.text == "alpha beta",
         editor.history.undoDepth == 0 else {
             throw Failure.editing

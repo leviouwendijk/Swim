@@ -1,13 +1,32 @@
 import SwimInterpreter
 
 extension SwimEditor {
-    func allowsBufferAction(
-        _ action: SwimInterpreter.InteractionAction
-    ) -> Bool {
-        guard bufferModifiability == .nonmodifiable else {
-            return true
+    func rejection(
+        for action: SwimInterpreter.InteractionAction
+    ) -> SwimEditorRejection? {
+        guard bufferModifiability == .nonmodifiable,
+              !allowsActionInNonmodifiableBuffer(
+                action
+              ) else {
+            return nil
         }
 
+        return bufferModificationRejection
+    }
+
+    var bufferModificationRejection: SwimEditorRejection? {
+        guard bufferModifiability == .nonmodifiable else {
+            return nil
+        }
+
+        return SwimEditorRejection(
+            reason: .bufferNonmodifiable
+        )
+    }
+
+    private func allowsActionInNonmodifiableBuffer(
+        _ action: SwimInterpreter.InteractionAction
+    ) -> Bool {
         switch action {
         case .motion,
              .enterVisual,
