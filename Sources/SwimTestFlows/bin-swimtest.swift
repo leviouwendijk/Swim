@@ -8,6 +8,8 @@ enum SwimTest {
         try SwimSelectionDisplayColumnSmoke.run()
         try SwimRegisterPasteSmoke.run()
         try SwimEditHistorySmoke.run()
+        try SwimEditSessionSmoke.run()
+        try SwimBlockChangeSmoke.run()
 
         print(
             "swim editor engine smoke passed"
