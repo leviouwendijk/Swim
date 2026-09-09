@@ -52,6 +52,10 @@ let package = Package(
                     name: "SwimInterpreter",
                     package: "SwimInterpreter"
                 ),
+                .product(
+                    name: "SwimIO",
+                    package: "SwimIO"
+                ),
             ]
         ),
     ],
