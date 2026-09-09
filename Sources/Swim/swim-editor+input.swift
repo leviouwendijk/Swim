@@ -1,4 +1,5 @@
 import Foundation
+import Position
 import SwimInterpreter
 
 extension SwimEditor {
@@ -45,7 +46,7 @@ extension SwimEditor {
             selection = nil
 
             if placement == .afterCursor {
-                _ = buffer.moveRight()
+                moveInsertionPointAfterCursorOnLine()
             }
 
             return .changed
@@ -120,6 +121,33 @@ extension SwimEditor {
         case .redo:
             return redoHistory()
         }
+    }
+
+    private mutating func moveInsertionPointAfterCursorOnLine() {
+        let table = LineTable(
+            text: buffer.text
+        )
+        let cursor = table.indices.clamped(
+            buffer.cursor
+        )
+        let line = table.lines.number(
+            containing: cursor
+        )
+
+        guard let content = table.lines.ranges.content(
+            line
+        ),
+        content.contains(
+            cursor
+        ) else {
+            return
+        }
+
+        _ = buffer.setCursor(
+            cursor.advanced(
+                by: 1
+            )
+        )
     }
 
     mutating func insertPastedText(

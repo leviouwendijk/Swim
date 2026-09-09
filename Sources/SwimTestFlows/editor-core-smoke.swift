@@ -127,6 +127,57 @@ enum SwimEditorCoreSmoke {
         lineStart.buffer.cursor == PositionIndex(4) else {
             throw Failure.insertExitCursor
         }
+
+        var emptyMiddleLine = SwimEditor(
+            text: "one\n\nthree",
+            cursor: PositionIndex(4)
+        )
+
+        guard emptyMiddleLine.handle(
+            .char("a")
+        ) == .changed,
+        emptyMiddleLine.mode == .insert,
+        emptyMiddleLine.buffer.cursor == PositionIndex(4),
+        emptyMiddleLine.handle(
+            .escape
+        ) == .changed,
+        emptyMiddleLine.buffer.cursor == PositionIndex(4) else {
+            throw Failure.insertExitCursor
+        }
+
+        var emptyFinalLine = SwimEditor(
+            text: "one\n",
+            cursor: PositionIndex(4)
+        )
+
+        guard emptyFinalLine.handle(
+            .char("a")
+        ) == .changed,
+        emptyFinalLine.mode == .insert,
+        emptyFinalLine.buffer.cursor == PositionIndex(4),
+        emptyFinalLine.handle(
+            .escape
+        ) == .changed,
+        emptyFinalLine.buffer.cursor == PositionIndex(4) else {
+            throw Failure.insertExitCursor
+        }
+
+        var whitespaceLine = SwimEditor(
+            text: "one\n  \nthree",
+            cursor: PositionIndex(5)
+        )
+
+        guard whitespaceLine.handle(
+            .char("a")
+        ) == .changed,
+        whitespaceLine.mode == .insert,
+        whitespaceLine.buffer.cursor == PositionIndex(6),
+        whitespaceLine.handle(
+            .escape
+        ) == .changed,
+        whitespaceLine.buffer.cursor == PositionIndex(5) else {
+            throw Failure.insertExitCursor
+        }
     }
 
     private static func runCopyProbe() throws {
