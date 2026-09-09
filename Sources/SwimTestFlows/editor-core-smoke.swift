@@ -7,6 +7,7 @@ enum SwimEditorCoreSmoke {
         Error
     {
         case insertHistory
+        case insertExitCursor
         case undoRedo
         case copyEvent
         case operatorDelete
@@ -17,6 +18,7 @@ enum SwimEditorCoreSmoke {
 
     static func run() throws {
         try runInsertHistoryProbe()
+        try runInsertExitCursorProbe()
         try runCopyProbe()
         try runOperatorProbe()
         try runBlockMotionProbe()
@@ -56,6 +58,74 @@ enum SwimEditorCoreSmoke {
         ) == .changed,
         editor.buffer.text == "ab" else {
             throw Failure.undoRedo
+        }
+    }
+
+    private static func runInsertExitCursorProbe() throws {
+        var insert = SwimEditor(
+            text: "asdfasd",
+            cursor: PositionIndex(3)
+        )
+
+        guard insert.handle(
+            .char("i")
+        ) == .changed,
+        insert.handle(
+            .escape
+        ) == .changed,
+        insert.mode == .normal,
+        insert.buffer.cursor == PositionIndex(2) else {
+            throw Failure.insertExitCursor
+        }
+
+        var append = SwimEditor(
+            text: "asdfasd",
+            cursor: PositionIndex(3)
+        )
+
+        guard append.handle(
+            .char("a")
+        ) == .changed,
+        append.handle(
+            .escape
+        ) == .changed,
+        append.mode == .normal,
+        append.buffer.cursor == PositionIndex(3) else {
+            throw Failure.insertExitCursor
+        }
+
+        var inserted = SwimEditor(
+            text: "asdfasd",
+            cursor: PositionIndex(3)
+        )
+
+        guard inserted.handle(
+            .char("i")
+        ) == .changed,
+        inserted.handle(
+            .char("X")
+        ) == .changed,
+        inserted.handle(
+            .escape
+        ) == .changed,
+        inserted.buffer.text == "asdXfasd",
+        inserted.buffer.cursor == PositionIndex(3) else {
+            throw Failure.insertExitCursor
+        }
+
+        var lineStart = SwimEditor(
+            text: "one\ntwo",
+            cursor: PositionIndex(4)
+        )
+
+        guard lineStart.handle(
+            .char("i")
+        ) == .changed,
+        lineStart.handle(
+            .escape
+        ) == .changed,
+        lineStart.buffer.cursor == PositionIndex(4) else {
+            throw Failure.insertExitCursor
         }
     }
 

@@ -182,6 +182,13 @@ public struct SwimEditor:
                 context: context
             )
 
+            if case .returnToNormal = action,
+               isEditingMode(
+                modeBefore
+               ) {
+                normalizeCursorAfterEditingExit()
+            }
+
             if !isHistoryNavigation(
                 action
             ) {
@@ -211,6 +218,31 @@ public struct SwimEditor:
             modeBefore: modeBefore
         )
         return event
+    }
+
+    private mutating func normalizeCursorAfterEditingExit() {
+        let table = LineTable(
+            text: buffer.text
+        )
+        let cursor = table.indices.clamped(
+            buffer.cursor
+        )
+        let line = table.lines.number(
+            containing: cursor
+        )
+
+        guard let lineStart = table.lines.start(
+            line
+        ),
+        cursor > lineStart else {
+            return
+        }
+
+        _ = buffer.setCursor(
+            cursor.advanced(
+                by: -1
+            )
+        )
     }
 
     private func isHistoryNavigation(
