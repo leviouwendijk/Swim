@@ -81,6 +81,31 @@ public struct SwimTextBuffer:
     }
 
     @discardableResult
+    public mutating func append(
+        _ value: String,
+        moveCursorToEnd: Bool = false
+    ) -> Bool {
+        let value = Self.normalized(
+            value
+        )
+
+        guard !value.isEmpty else {
+            return false
+        }
+
+        text.append(
+            contentsOf: value
+        )
+
+        if moveCursorToEnd {
+            cursorOffset = text.count
+            preferredColumn = nil
+        }
+
+        return true
+    }
+
+    @discardableResult
     public mutating func setCursor(
         _ cursor: PositionIndex
     ) -> Bool {

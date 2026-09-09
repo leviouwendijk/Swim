@@ -11,6 +11,7 @@ public struct SwimEditor:
     public internal(set) var blockInsertSession: SwimBlockInsertSession?
     public internal(set) var replaceSession: SwimReplaceSession?
     public internal(set) var registers: SwimRegisterBank
+    public let bufferModifiability: SwimBufferModifiability
     public var shiftWidth: Int
     public internal(set) var history: SwimEditHistory
 
@@ -18,6 +19,7 @@ public struct SwimEditor:
         text: String = "",
         cursor: PositionIndex? = nil,
         mode: SwimInterpreter.Mode = .normal,
+        bufferModifiability: SwimBufferModifiability = .modifiable,
         shiftWidth: Int = 4,
         registers: SwimRegisterBank = .init(),
         history: SwimEditHistory = .init()
@@ -26,10 +28,18 @@ public struct SwimEditor:
             text: text,
             cursor: cursor
         )
+        self.bufferModifiability = bufferModifiability
+
+        let resolvedMode: SwimInterpreter.Mode =
+            bufferModifiability == .nonmodifiable
+            && (mode == .insert || mode == .replace)
+                ? .normal
+                : mode
+
         interaction = SwimInterpreter.ModalInteraction(
-            mode: mode
+            mode: resolvedMode
         )
-        selection = mode == .visual
+        selection = resolvedMode == .visual
             ? SwimSelection(
                 anchor: buffer.cursor,
                 cursor: buffer.cursor,
@@ -37,7 +47,7 @@ public struct SwimEditor:
             )
             : nil
         blockInsertSession = nil
-        replaceSession = mode == .replace
+        replaceSession = resolvedMode == .replace
             ? SwimReplaceSession(
                 start: buffer.cursor
             )
@@ -107,9 +117,45 @@ public struct SwimEditor:
         history.reset()
     }
 
+    @discardableResult
+    public mutating func appendBufferContent(
+        _ text: String,
+        moveCursorToEnd: Bool = false
+    ) -> Bool {
+        guard buffer.append(
+            text,
+            moveCursorToEnd: moveCursorToEnd
+        ) else {
+            return false
+        }
+
+        if moveCursorToEnd,
+           var selection
+        {
+            selection.cursor = buffer.cursor
+            self.selection = selection
+        }
+
+        history.reset()
+        return true
+    }
+
     public mutating func setMode(
         _ mode: SwimInterpreter.Mode
     ) {
+        if bufferModifiability == .nonmodifiable,
+           isEditingMode(
+            mode
+           ) {
+            interaction.setMode(
+                .normal
+            )
+            selection = nil
+            blockInsertSession = nil
+            replaceSession = nil
+            return
+        }
+
         let previousMode = interaction.mode
 
         if !isEditingMode(
@@ -177,6 +223,13 @@ public struct SwimEditor:
             return nil
 
         case .action(let action):
+            guard allowsBufferAction(
+                action
+            ) else {
+                normalizeAfterRejectedBufferModification()
+                return .changed
+            }
+
             let event = apply(
                 action,
                 context: context
@@ -206,6 +259,10 @@ public struct SwimEditor:
         _ text: String,
         context: SwimEditorContext = .init()
     ) -> SwimEditorEvent? {
+        guard bufferModifiability == .modifiable else {
+            return nil
+        }
+
         let before = buffer
         let modeBefore = mode
         let event = insertPastedText(

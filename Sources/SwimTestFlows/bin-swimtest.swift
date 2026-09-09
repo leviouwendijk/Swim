@@ -11,6 +11,7 @@ enum SwimTest {
         try SwimEditSessionSmoke.run()
         try SwimBlockChangeSmoke.run()
         try SwimEditorCoreSmoke.run()
+        try SwimBufferModifiabilitySmoke.run()
 
         print(
             "swim editor engine smoke passed"
