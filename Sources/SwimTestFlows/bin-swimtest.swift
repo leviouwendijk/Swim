@@ -12,6 +12,7 @@ enum SwimTest {
         try SwimBlockChangeSmoke.run()
         try SwimEditorCoreSmoke.run()
         try SwimBufferModifiabilitySmoke.run()
+        try SwimKeySequenceMapSmoke.run()
 
         print(
             "swim editor engine smoke passed"
